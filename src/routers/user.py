@@ -39,6 +39,7 @@ def get_user(db: Session = Depends(get_db)):
 
 @router.post("/user/", tags = ["User"])
 def post_chamado(data: UserTemplate, db: Session = Depends(get_db)):
+    new_object = models.User(**data.dict())
     db.add(new_object)
     db.commit()
     db.refresh(new_object)
