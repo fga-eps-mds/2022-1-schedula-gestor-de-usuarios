@@ -1,13 +1,15 @@
-from sqlalchemy import Column, String, Boolean, DateTime, LargeBinary, Enum, Text
+from sqlalchemy import Column, String, Boolean, TIMESTAMP, LargeBinary, Enum, Text
+from sqlalchemy.sql import func
+from datetime import datetime
 
 import enum
 
 from database import Base
 
-class AcessEnum(enum.Enum):
-    basic = 1
-    manager = 2
-    admin = 3
+class AcessEnum(str, enum.Enum):
+    basic = "basic"
+    manager = "manager"
+    admin = "admin"
 
 
 class User(Base):
@@ -19,6 +21,10 @@ class User(Base):
     email = Column(String(100), nullable=False)
     password = Column(Text, nullable=False)
     active = Column(Boolean, default = True)
-    updated_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(
+        TIMESTAMP,
+        server_default=func.current_timestamp(),
+        server_onupdate=func.current_timestamp(),
+    )
     acess  = Column(Enum(AcessEnum), nullable=False, default = AcessEnum.basic)
 
