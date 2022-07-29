@@ -1,3 +1,4 @@
+from cmath import e
 from fastapi import APIRouter, Depends, status
 from pydantic import BaseModel
 from database import engine, SessionLocal
@@ -53,12 +54,20 @@ def get_password_hash(passe):
 @router.get("/user/", tags = ["User"])
 def get_user(db: Session = Depends(get_db)):
     all_data = db.query(models.User).all()
-    return{
-        "message": "dados buscados com sucesso",
-        "error": None,
-        "data": all_data,
+    if(all_data != []):
+        all_data_json = jsonable_encoder(all_data)
+        return JSONResponse(status_code = status.HTTP_201_CREATED, content = {
+                "message": "dados buscados com sucesso",
+                "error": None,
+                "data": all_data_json,
+            })
 
-    }
+    else:
+        return JSONResponse(status_code = status.HTTP_500_INTERNAL_SERVER_ERROR, content = {
+            "message": "dados não encontrados",
+            "error": str(e),
+            "data": None,
+        })
 
 @router.post("/user/", tags = ["User"])
 def post_chamado(data: UserTemplate, db: Session = Depends(get_db)):
@@ -68,10 +77,7 @@ def post_chamado(data: UserTemplate, db: Session = Depends(get_db)):
         db.add(new_object)
         db.commit()
         db.refresh(new_object)
-        new_object_dict = {
-            c.key: getattr(new_object, c.key)
-            for c in inspect(new_object).mapper.column_attrs
-        }
+
 
         new_object.updated_at = str(new_object.updated_at) 
         new_object.active = str(new_object.active)
