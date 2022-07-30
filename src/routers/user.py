@@ -52,7 +52,7 @@ def get_password_hash(passe):
 
 
 @router.get("/user/", tags = ["User"])
-def get_user(db: Session = Depends(get_db)):
+async def get_user(db: Session = Depends(get_db)):
     all_data = db.query(models.User).all()
     if(all_data != []):
         all_data_json = jsonable_encoder(all_data)
@@ -70,7 +70,7 @@ def get_user(db: Session = Depends(get_db)):
         })
 
 @router.post("/user/", tags = ["User"])
-def post_chamado(data: UserTemplate, db: Session = Depends(get_db)):
+async def post_user(data: UserTemplate, db: Session = Depends(get_db)):
     try:
         new_object = models.User(**data.dict())
         new_object.password = str(get_password_hash(new_object.password))
@@ -80,7 +80,7 @@ def post_chamado(data: UserTemplate, db: Session = Depends(get_db)):
 
 
         new_object.updated_at = str(new_object.updated_at) 
-        new_object.active = str(new_object.active)
+
 
         new_object_json = jsonable_encoder(new_object)
 
@@ -97,29 +97,29 @@ def post_chamado(data: UserTemplate, db: Session = Depends(get_db)):
         })
 
 @router.delete("/user/{username}", tags=["User"])
-def delete_user(username: str, db: Session = Depends(get_db)):
+async def delete_user(username: str, db: Session = Depends(get_db)):
 
     try:
-        deluser = find_user(username, db)
-        db.delete(deluser)
-        db.commit()
-        return JSONResponse(status_code = 200, content = {
-            "message": "Dados deletados com sucesso",
-            "error": None,
-            "data": None,
-        })
+        user = db.query(models.User).filter(models.User.username == username).first()
+        if user:
+            db.delete(user)
+            db.commit()
+            return JSONResponse(status_code = 200, content = {
+                "message": "Dados deletados com sucesso",
+                "error": None,
+                "data": None,
+            })
+
+        else:
+            return JSONResponse(status_code = 200, content = {
+                "message": "Usuario não encontrado",
+                "error": None,
+                "data": None,
+            })
 
     except Exception as e:
         return JSONResponse(status_code = 404, content = {
-            "message": "Erro ao encontrar dados",
+            "message": "Erro ao processar dados",
             "error": str(e),
             "data": None,
         })
-
-#usado para encontrar user pelo username
-@router.get("/items/")
-def find_user(us, db):
-    db_user = db.query(models.User).filter(models.User.username == us).first()
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return db_user
