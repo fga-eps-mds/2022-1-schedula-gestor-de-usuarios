@@ -1,11 +1,11 @@
 from cmath import e
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from database import engine, SessionLocal
 import models
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 import json
 from sqlalchemy import inspect
 from fastapi.encoders import jsonable_encoder
@@ -95,3 +95,31 @@ def post_chamado(data: UserTemplate, db: Session = Depends(get_db)):
             "error": str(e),
             "data": None,
         })
+
+@router.delete("/user/{username}", tags=["User"])
+def delete_user(username: str, db: Session = Depends(get_db)):
+
+    try:
+        deluser = find_user(username, db)
+        db.delete(deluser)
+        db.commit()
+        return JSONResponse(status_code = 200, content = {
+            "message": "Dados deletados com sucesso",
+            "error": None,
+            "data": None,
+        })
+
+    except Exception as e:
+        return JSONResponse(status_code = 404, content = {
+            "message": "Erro ao encontrar dados",
+            "error": str(e),
+            "data": None,
+        })
+
+#usado para encontrar user pelo username
+@router.get("/items/")
+def find_user(us, db):
+    db_user = db.query(models.User).filter(models.User.username == us).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db_user
