@@ -6,7 +6,6 @@ services:
       dockerfile: docker/Dockerfile
       context: .
     env_file: .env
-    container_name: gestor-de-usuarios
     volumes:
       - "./src/:/home/src/"
     ports:
@@ -16,7 +15,6 @@ services:
 
   db:
     image: postgres:13.2-alpine
-    container_name: db
     env_file: .env
     volumes:
       - ./database:/docker-entrypoint-initdb.d
