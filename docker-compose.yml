@@ -2,8 +2,9 @@ version: "3"
 
 services:
   gestor-de-usuarios:
+    container_name: gestor-de-usuarios
     build:
-      dockerfile: docker/Dockerfile
+      dockerfile: Dockerfile
       context: .
     env_file: .env
     volumes:
@@ -14,6 +15,7 @@ services:
       - db
 
   db:
+    container_name: db
     image: postgres:13.2-alpine
     env_file: .env
     volumes:
