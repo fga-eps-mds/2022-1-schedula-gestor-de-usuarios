@@ -1,25 +1,17 @@
 from cmath import e
-from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
-from database import engine, SessionLocal
-import models
-from sqlalchemy.orm import Session
-from passlib.context import CryptContext
-from fastapi.responses import JSONResponse, HTMLResponse
-import json
-from sqlalchemy import inspect
-from fastapi.encoders import jsonable_encoder
 
+from fastapi import APIRouter, Depends, status
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
+from passlib.context import CryptContext
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+import models
+from database import engine, get_db
 
 router = APIRouter()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-
-    finally:
-        db.close()
 
 class UserTemplate(BaseModel):
     username: str
@@ -43,33 +35,37 @@ class UserTemplate(BaseModel):
             }
         }
 
-models.Base.metadata.create_all(bind = engine)
+
+models.Base.metadata.create_all(bind=engine)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 def get_password_hash(passe):
     return pwd_context.hash(passe)
 
 
-@router.get("/user/", tags = ["User"])
+@router.get("/user/", tags=["User"])
 async def get_user(db: Session = Depends(get_db)):
     all_data = db.query(models.User).all()
-    if(all_data != []):
+    if all_data != []:
         all_data_json = jsonable_encoder(all_data)
-        return JSONResponse(status_code = status.HTTP_201_CREATED, content = {
-                "message": "dados buscados com sucesso",
-                "error": None,
-                "data": all_data_json,
-            })
-
-    else:
-        return JSONResponse(status_code = status.HTTP_500_INTERNAL_SERVER_ERROR, content = {
-            "message": "dados não encontrados",
-            "error": str(e),
-            "data": None,
+        return JSONResponse(status_code=status.HTTP_201_CREATED, content={
+            "message": "dados buscados com sucesso",
+            "error": None,
+            "data": all_data_json,
         })
 
-@router.post("/user/", tags = ["User"])
+    else:
+        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            content={
+                                "message": "dados não encontrados",
+                                "error": str(e),
+                                "data": None,
+                            })
+
+
+@router.post("/user/", tags=["User"])
 async def post_user(data: UserTemplate, db: Session = Depends(get_db)):
     try:
         new_object = models.User(**data.dict())
@@ -78,47 +74,50 @@ async def post_user(data: UserTemplate, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(new_object)
 
-
-        new_object.updated_at = str(new_object.updated_at) 
-
+        new_object.updated_at = str(new_object.updated_at)
 
         new_object_json = jsonable_encoder(new_object)
 
-        return JSONResponse(status_code = status.HTTP_201_CREATED, content = {
-            "message": "Dados buscados com sucesso",
+        return JSONResponse(status_code=status.HTTP_201_CREATED, content={
+            "message": "Dados cadastrados com sucesso",
             "error": None,
             "data": new_object_json,
         })
     except Exception as e:
-        return JSONResponse(status_code = status.HTTP_500_INTERNAL_SERVER_ERROR, content = {
-            "message": "Erro ao obter dados",
-            "error": str(e),
-            "data": None,
-        })
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "message": "Erro ao obter dados",
+                "error": str(e),
+                "data": None,
+            })
+
 
 @router.delete("/user/{username}", tags=["User"])
 async def delete_user(username: str, db: Session = Depends(get_db)):
 
     try:
-        user = db.query(models.User).filter(models.User.username == username).first()
+        user = db.query(
+            models.User).filter(
+            models.User.username == username).first()
         if user:
             db.delete(user)
             db.commit()
-            return JSONResponse(status_code = 200, content = {
+            return JSONResponse(status_code=200, content={
                 "message": "Dados deletados com sucesso",
                 "error": None,
                 "data": None,
             })
 
         else:
-            return JSONResponse(status_code = 200, content = {
+            return JSONResponse(status_code=200, content={
                 "message": "Usuario não encontrado",
                 "error": None,
                 "data": None,
             })
 
     except Exception as e:
-        return JSONResponse(status_code = 404, content = {
+        return JSONResponse(status_code=404, content={
             "message": "Erro ao processar dados",
             "error": str(e),
             "data": None,
