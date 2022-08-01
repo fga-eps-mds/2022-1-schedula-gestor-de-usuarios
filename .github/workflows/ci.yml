@@ -40,14 +40,14 @@ jobs:
     - name: Build the Docker image
       run: docker-compose build
 
-    - name: Run the docker aplication
+    - name: Run the docker server
       run: docker-compose up -d
     
     - name: Run isort
-      run: docker-compose run app bash -c "isort *.py --diff"
+      run: docker-compose run gestor-de-usuarios bash -c "isort *.py --diff"
       
     - name: Run Flake8
-      run: docker-compose run app bash -c "flake8"
+      run: docker-compose run gestor-de-usuarios bash -c "flake8"
   
   tests:
   
@@ -66,5 +66,5 @@ jobs:
       run: docker-compose up -d
     
     - name: Run tests
-      run: docker-compose run app bash -c "pytest -vv --cov"
+      run: docker-compose run gestor-de-usuarios bash -c "pytest -vv --cov"
   
