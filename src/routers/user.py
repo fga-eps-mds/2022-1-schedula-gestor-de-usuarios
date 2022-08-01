@@ -1,14 +1,14 @@
 from cmath import e
-from fastapi import APIRouter, Depends, status
-from pydantic import BaseModel
-from database import engine
-import models
-from sqlalchemy.orm import Session
-from passlib.context import CryptContext
-from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
-from database import get_db
 
+from fastapi import APIRouter, Depends, status
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
+from passlib.context import CryptContext
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+import models
+from database import engine, get_db
 
 router = APIRouter()
 

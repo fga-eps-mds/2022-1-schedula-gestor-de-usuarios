@@ -21,7 +21,7 @@ jobs:
     - uses: actions/checkout@v3
     
     - name: Create a docker network
-      run: docker network create simple_network
+      run: docker network create schedula-network
       
     - name: Build the Docker image
       run: docker-compose build
@@ -35,7 +35,7 @@ jobs:
     - uses: actions/checkout@v3
     
     - name: Create a docker network
-      run: docker network create simple_network  
+      run: docker network create schedula-network  
       
     - name: Build the Docker image
       run: docker-compose build
@@ -57,7 +57,7 @@ jobs:
     - uses: actions/checkout@v3
     
     - name: Create a docker network
-      run: docker network create simple_network  
+      run: docker network create schedula-network  
       
     - name: Build the Docker image
       run: docker-compose build

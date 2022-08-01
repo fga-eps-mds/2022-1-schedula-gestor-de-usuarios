@@ -1,18 +1,19 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from fastapi.testclient import TestClient
-import pytest
 import os
 import sys
+
+import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 try:
     sys.path.append(os.getcwd() + "/src")
 except Exception:
     pass
 
-from main import app
-from database import get_db
 import models
+from database import get_db
+from main import app
 
 engine = create_engine("sqlite:///test.db")
 TestingSessionLocal = sessionmaker(
