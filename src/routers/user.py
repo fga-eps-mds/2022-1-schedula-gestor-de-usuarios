@@ -47,7 +47,7 @@ def get_password_hash(passe):
 
 @router.get("/user/", tags=["User"])
 async def get_user(db: Session = Depends(get_db)):
-    all_data = db.query(models.User).all()
+    all_data = db.query(models.User).filter_by(active=True).all()
     if all_data != []:
         all_data_json = jsonable_encoder(all_data)
         return JSONResponse(status_code=status.HTTP_201_CREATED, content={
@@ -101,7 +101,7 @@ async def delete_user(username: str, db: Session = Depends(get_db)):
             models.User).filter(
             models.User.username == username).first()
         if user:
-            db.delete(user)
+            user.active = False
             db.commit()
             return JSONResponse(status_code=200, content={
                 "message": "Dados deletados com sucesso",
