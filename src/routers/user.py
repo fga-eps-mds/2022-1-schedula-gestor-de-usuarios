@@ -23,6 +23,16 @@ class UserTemplate(BaseModel):
     updated_at: str | None = None
     acess: str
 
+class UserUpdateTemplate(BaseModel):
+    username: str | None = None
+    job_role: str | None = None
+    name: str | None = None
+    email: str | None = None
+    password: str | None = None
+    active: bool | None = None
+    updated_at: str 
+    acess: str | None = None
+
     class Config:
         schema_extra = {
             "example": {
@@ -35,6 +45,12 @@ class UserTemplate(BaseModel):
             }
         }
 
+def get_error_response(e: Exception):
+    return {
+        "message": "Erro ao processar dados",
+        "error": str(e),
+        "data": None
+    }
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -122,3 +138,48 @@ async def delete_user(username: str, db: Session = Depends(get_db)):
             "error": str(e),
             "data": None,
         })
+
+@router.put("/user/{username}", tags=["User"])
+async def update_user(data: UserUpdateTemplate , nameuser: str ,db: Session=Depends(get_db)):
+    try:
+        input_values = models.User(**data.dict())
+        User = await get_problem_from_db(nameuser, db)
+        if User:
+            if(input_values.username != None):
+                User.username = input_values.username
+            if(input_values.job_role != None):
+                User.job_role = input_values.job_role
+            if(input_values.email != None):
+                User.email = input_values.email
+            if(input_values.name != None):
+                User.name = input_values.name
+            if(input_values.password != None):
+                User.password = input_values.password
+            if(input_values.active != None):
+                User.active = input_values.active
+            User.updated_at = input_values.updated_at
+            if(input_values.acess != None):
+                User.acess = input_values.acess
+
+            db.add(User)
+            db.commit()
+            db.refresh(User)
+
+            User = jsonable_encoder(User)
+            response_data = jsonable_encoder({
+                "message": "Usuário atualizado com sucesso",
+                "error": None,
+                "data": User
+            })
+        else:
+            response_data = jsonable_encoder({
+                "message": f"Usuário não encontrado",
+                "error": None,
+                "data": None
+            })
+        return JSONResponse(content=response_data,status_code=status.HTTP_201_CREATED)
+    except Exception as e:
+        return JSONResponse(content=get_error_response(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+async def get_problem_from_db(nameuser: str, db: Session):
+    return db.query(models.User).filter_by(username=nameuser).one_or_none()
