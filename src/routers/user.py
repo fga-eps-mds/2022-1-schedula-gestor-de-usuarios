@@ -23,15 +23,6 @@ class UserTemplate(BaseModel):
     updated_at: str | None = None
     acess: str
 
-class UserUpdateTemplate(BaseModel):
-    username: str | None = None
-    job_role: str | None = None
-    name: str | None = None
-    email: str | None = None
-    password: str | None = None
-    active: bool | None = None
-    updated_at: str 
-    acess: str | None = None
 
     class Config:
         schema_extra = {
@@ -139,27 +130,22 @@ async def delete_user(username: str, db: Session = Depends(get_db)):
             "data": None,
         })
 
+
 @router.put("/user/{username}", tags=["User"])
-async def update_user(data: UserUpdateTemplate , nameuser: str ,db: Session=Depends(get_db)):
+async def update_user(data: UserTemplate , nameuser: str ,db: Session=Depends(get_db)):
     try:
         input_values = models.User(**data.dict())
         User = await get_problem_from_db(nameuser, db)
         if User:
-            if(input_values.username != None):
-                User.username = input_values.username
-            if(input_values.job_role != None):
-                User.job_role = input_values.job_role
-            if(input_values.email != None):
-                User.email = input_values.email
-            if(input_values.name != None):
-                User.name = input_values.name
-            if(input_values.password != None):
-                User.password = input_values.password
-            if(input_values.active != None):
-                User.active = input_values.active
+
+            User.username = input_values.username
+            User.job_role = input_values.job_role
+            User.email = input_values.email
+            User.name = input_values.name
+            User.password = input_values.password
+            User.active = input_values.active
             User.updated_at = input_values.updated_at
-            if(input_values.acess != None):
-                User.acess = input_values.acess
+            User.acess = input_values.acess
 
             db.add(User)
             db.commit()
