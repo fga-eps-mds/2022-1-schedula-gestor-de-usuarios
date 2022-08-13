@@ -10,7 +10,7 @@ CREATE TABLE "public"."user" (
     username      VARCHAR(250)         NOT NULL,
     name    VARCHAR(250)    NOT NULL,
     job_role    VARCHAR(250)    NOT NULL,
-    email    VARCHAR(100)    NOT NULL,
+    email    VARCHAR(100),
     password    TEXT    NOT NULL,
     active    BOOLEAN         NOT NULL DEFAULT TRUE,
     updated_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -18,7 +18,7 @@ class User(Base):
     username = Column(String(100), nullable=False, primary_key=True)
     job_role = Column(String(250), nullable=False)
     name = Column(String(250), nullable=False)
-    email = Column(String(100), nullable=False)
+    email = Column(String(100))
     password = Column(Text, nullable=False)
     active = Column(Boolean, default=True)
     updated_at = Column(
