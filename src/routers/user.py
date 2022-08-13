@@ -1,5 +1,3 @@
-from cmath import e
-
 from fastapi import APIRouter, Depends, status, Path
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -15,12 +13,12 @@ router = APIRouter()
 
 class UserTemplate(BaseModel):
     username: str
-    job_role: str
+    job_role: str | None = None
     name: str
-    email: str
+    email: str | None = None
     password: str
     active: bool = True
-    updated_at: str = None
+    updated_at: str | None = None
     acess: str
 
     class Config:
@@ -36,28 +34,6 @@ class UserTemplate(BaseModel):
         }
 
 
-class UserTemplatePut(BaseModel):
-    username: str
-    job_role: str
-    name: str
-    email: str
-    password: str
-    active: bool = True
-    acess: str
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "username": "Fulano",
-                "job_role": "Agente",
-                "name": "Fulano de Tal",
-                "email": "novoemail@gmail.com",
-                "password": "Problema123",
-                "acess": "manager",
-            }
-        }
-
-
 models.Base.metadata.create_all(bind=engine)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -69,23 +45,22 @@ def get_password_hash(passe):
 
 @router.get("/user/", tags=["User"])
 async def get_user(db: Session = Depends(get_db)):
-    all_data = db.query(models.User).filter_by(active=True).all()
-    if all_data != []:
+    try:
+        all_data = db.query(models.User).filter_by(active=True).all()
         all_data_json = jsonable_encoder(all_data)
         return JSONResponse(
-            status_code=status.HTTP_201_CREATED,
+            status_code=status.HTTP_200_OK,
             content={
                 "message": "dados buscados com sucesso",
                 "error": None,
                 "data": all_data_json,
             },
         )
-
-    else:
+    except Exception as e:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={
-                "message": "dados não encontrados",
+                "message": "Erro ao obter dados",
                 "error": str(e),
                 "data": None,
             },
@@ -95,29 +70,46 @@ async def get_user(db: Session = Depends(get_db)):
 @router.post("/user/", tags=["User"])
 async def post_user(data: UserTemplate, db: Session = Depends(get_db)):
     try:
-        new_object = models.User(**data.dict())
-        new_object.password = str(get_password_hash(new_object.password))
-        db.add(new_object)
-        db.commit()
-        db.refresh(new_object)
-
-        new_object.updated_at = str(new_object.updated_at)
-
-        new_object_json = jsonable_encoder(new_object)
-
-        return JSONResponse(
-            status_code=status.HTTP_201_CREATED,
-            content={
-                "message": "Dados cadastrados com sucesso",
-                "error": None,
-                "data": new_object_json,
-            },
+        username = data.username
+        user = (
+            db.query(models.User)
+            .filter(models.User.username == username)
+            .one_or_none()
         )
+
+        if user:
+            return JSONResponse(
+                status_code=status.HTTP_409_CONFLICT,
+                content={
+                    "message": "O username já está em uso",
+                    "error": None,
+                    "data": None,
+                },
+            )
+        else:
+            new_object = models.User(**data.dict())
+            new_object.password = str(get_password_hash(new_object.password))
+            db.add(new_object)
+            db.commit()
+            db.refresh(new_object)
+
+            new_object.updated_at = str(new_object.updated_at)
+
+            new_object_json = jsonable_encoder(new_object)
+
+            return JSONResponse(
+                status_code=status.HTTP_201_CREATED,
+                content={
+                    "message": "Dados cadastrados com sucesso",
+                    "error": None,
+                    "data": new_object_json,
+                },
+            )
     except Exception as e:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={
-                "message": "Erro ao obter dados",
+                "message": "Erro ao inserir dados",
                 "error": str(e),
                 "data": None,
             },
@@ -168,24 +160,47 @@ async def delete_user(username: str, db: Session = Depends(get_db)):
 
 @router.put("/user/{username}", tags=["User"])
 async def update_user(
-    data: UserTemplatePut,
+    data: UserTemplate,
     username: str = Path(title="Username"),
     db: Session = Depends(get_db),
 ):
     try:
-        db.query(models.User).filter_by(username=username).update(data.dict())
-        db.commit()
-        response_data = jsonable_encoder(
-            {
-                "message": "Dado atualizado com sucesso",
-                "error": None,
-                "data": None,
-            }
+        user = (
+            db.query(models.User)
+            .filter_by(username=username)
+            .update(data.dict())
         )
 
-        return JSONResponse(
-            content=response_data, status_code=status.HTTP_200_OK
-        )
+        if user:
+            db.commit()
+            user = (
+                db.query(models.User).filter_by(username=data.username).first()
+            )
+            user = jsonable_encoder(user)
+            response_data = jsonable_encoder(
+                {
+                    "message": "Dado atualizado com sucesso",
+                    "error": None,
+                    "data": user,
+                }
+            )
+
+            return JSONResponse(
+                content=response_data, status_code=status.HTTP_200_OK
+            )
+        else:
+            response_data = jsonable_encoder(
+                {
+                    "message": "Dado não encontrado na base",
+                    "error": None,
+                    "data": None,
+                }
+            )
+
+            return JSONResponse(
+                content=response_data, status_code=status.HTTP_404_NOT_FOUND
+            )
+
     except Exception as e:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -195,7 +210,3 @@ async def update_user(
                 "data": None,
             },
         )
-
-
-async def get_problem_from_db(nameuser: str, db: Session):
-    return db.query(models.User).filter_by(username=nameuser).one_or_none()
