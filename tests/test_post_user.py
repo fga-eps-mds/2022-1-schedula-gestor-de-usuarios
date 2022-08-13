@@ -25,5 +25,5 @@ def test_post_user(client):
     da = response.json()
     data = da["data"]
     assert data["username"] == "string"
-    print(data)
+    assert data["job_role"] == "string"
     
