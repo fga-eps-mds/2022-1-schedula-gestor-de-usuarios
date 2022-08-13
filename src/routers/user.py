@@ -195,7 +195,3 @@ async def update_user(
                 "data": None,
             },
         )
-
-
-async def get_problem_from_db(nameuser: str, db: Session):
-    return db.query(models.User).filter_by(username=nameuser).one_or_none()
