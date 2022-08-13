@@ -6,7 +6,7 @@ round = now.replace(microsecond=0)
 
 def test_get_user(client):
     response = client.get("/user/")
-    assert response.status_code == 201
+    assert response.status_code == 200
     assert response.json() == {
         "message": "dados buscados com sucesso",
         "error": None,

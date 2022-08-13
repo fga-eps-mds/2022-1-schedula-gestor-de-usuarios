@@ -16,6 +16,13 @@ def test_put_user(client):
     assert response.json() == {
                 "message": "Dado atualizado com sucesso",
                 "error": None,
-                "data": None,
+                'data': {'acess': 'basic',
+                    'active': True,
+                    'email': 'string@email.com',
+                    'job_role': 'string',
+                    'name': 'string',
+                    'password': 'string',
+                    'updated_at': None,
+                    'username': 'string'},
             }
     
