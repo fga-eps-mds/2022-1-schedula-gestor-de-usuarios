@@ -17,9 +17,8 @@ from main import app
 
 engine = create_engine("sqlite:///test.db")
 TestingSessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine)
+    autocommit=False, autoflush=False, bind=engine
+)
 
 models.Base.metadata.create_all(bind=engine)
 
