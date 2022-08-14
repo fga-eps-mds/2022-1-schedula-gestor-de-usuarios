@@ -30,7 +30,7 @@ def session():
     session = TestingSessionLocal()
 
     # Para o momento em que se for realizar testes nos enpoints
-    with open("data/insert_user.sql", "r") as f:
+    with open("./tests/data/insert_user.sql", "r") as f:
         session.execute(f.read())
         session.commit()
     yield session

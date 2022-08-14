@@ -13,6 +13,7 @@ RUN pip install -r requirements.txt
 
 COPY ./src/ .
 COPY ./tests/ .
+COPY ./tests/data ./tests/data/
 
 COPY ./start.sh .
 
