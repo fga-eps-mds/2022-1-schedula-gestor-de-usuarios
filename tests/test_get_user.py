@@ -1,5 +1,5 @@
 def test_get_user(client):
-    response = client.get("/user/")
+    response = client.get("/user")
     assert response.status_code == 200
     assert response.json() == {
         "message": "dados buscados com sucesso",

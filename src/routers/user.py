@@ -43,7 +43,7 @@ def get_password_hash(passe):
     return pwd_context.hash(passe)
 
 
-@router.get("/user/", tags=["User"])
+@router.get("/user", tags=["User"])
 async def get_user(db: Session = Depends(get_db)):
     try:
         all_data = db.query(models.User).filter_by(active=True).all()
@@ -67,7 +67,7 @@ async def get_user(db: Session = Depends(get_db)):
         )
 
 
-@router.post("/user/", tags=["User"])
+@router.post("/user", tags=["User"])
 async def post_user(data: UserTemplate, db: Session = Depends(get_db)):
     try:
         username = data.username

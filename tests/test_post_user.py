@@ -1,7 +1,7 @@
 def test_post_user(client):
 
     response = client.post(
-        "/user/",
+        "/user",
         json={
             "username": "string",
             "job_role": "string",
