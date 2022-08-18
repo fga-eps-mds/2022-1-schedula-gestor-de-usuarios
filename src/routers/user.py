@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from routers import Template_put
 
 import models
 from database import engine, get_db
@@ -160,15 +161,19 @@ async def delete_user(username: str, db: Session = Depends(get_db)):
 
 @router.put("/user/{username}", tags=["User"])
 async def update_user(
-    data: UserTemplate,
+    data: Template_put.UserTemp,
     username: str = Path(title="Username"),
     db: Session = Depends(get_db),
 ):
     try:
+
+        if data.password:
+            data.password = str(get_password_hash(data.password))
+
         user = (
             db.query(models.User)
             .filter_by(username=username)
-            .update(data.dict())
+            .update(data.dict(exclude_none=True))
         )
 
         if user:
