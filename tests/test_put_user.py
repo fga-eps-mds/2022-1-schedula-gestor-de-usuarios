@@ -2,7 +2,7 @@ def test_put_user(client):
     user_id = "string"
     response = client.put(
         f"/user/{user_id}",
-        json = {
+        json={
             "username": "string",
             "job_role": "string",
             "name": "string",

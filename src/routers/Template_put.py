@@ -1,6 +1,5 @@
-import models
 from pydantic import BaseModel
-from database import engine, get_db
+
 
 class UserTemp(BaseModel):
     username: str | None = None
