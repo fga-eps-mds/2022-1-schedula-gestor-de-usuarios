@@ -4,8 +4,7 @@ from fastapi.responses import JSONResponse
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from routers import Template_put
-
+from modelos.schemas import template_put
 import models
 from database import engine, get_db
 
@@ -161,7 +160,7 @@ async def delete_user(username: str, db: Session = Depends(get_db)):
 
 @router.put("/user/{username}", tags=["User"])
 async def update_user(
-    data: Template_put.UserTemp,
+    data: template_put.UserTemp,
     username: str = Path(title="Username"),
     db: Session = Depends(get_db),
 ):

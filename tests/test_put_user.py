@@ -18,3 +18,5 @@ def test_put_user(client):
     assert da["message"] == "Dado atualizado com sucesso"
     assert data["email"] == "string@email.com"
     assert data["job_role"] == "string"
+    assert data["name"] == "string"
+    assert data["acess"] == "basic"
