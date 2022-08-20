@@ -105,5 +105,15 @@ def test_get_user(client):
                 "updated_at": "2020-01-01T00:00:00",
                 "acess": "basic",
             },
+            {
+                "username": "User K",
+                "job_role": "Trabalho 11",
+                "name": "Nome A",
+                "email": "email 11",
+                "password": "senha11",
+                "active": True,
+                "updated_at": "2020-01-01T00:00:00",
+                "acess": "basic",      
+            }
         ],
     }
