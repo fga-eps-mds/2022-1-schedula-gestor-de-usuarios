@@ -167,27 +167,27 @@ async def update_user(
     db: Session = Depends(get_db),
 ):
 
-    if(db.query(models.User).filter(models.User.username == data.username).one_or_none()):
-            return JSONResponse(
-                content = {
-                    "message": "Usuário já cadastrado",
-                    "error": None,
-                    "data": None,
-                }, status_code=status.HTTP_200_OK
-            )
+    if data.password:
+        data.password = str(get_password_hash(data.password))
+
+    if data.username:
+        data.username = data.username.strip()
+
+    if data.name:
+        data.name = data.name.strip()
+
+    if (db.query(models.User).filter(
+            models.User.username == data.username).one_or_none()):
+        return JSONResponse(
+            content={
+                "message": "Usuário já cadastrado",
+                "error": None,
+                "data": None,
+            }, status_code=status.HTTP_200_OK
+        )
 
     else:
         try:
-
-            if data.password:
-                data.password = str(get_password_hash(data.password))
-
-            if data.username:
-                data.username = data.username.strip()
-
-            if data.name:
-                data.name = data.name.strip()
-
             user = (
                 db.query(models.User)
                 .filter_by(username=username)
@@ -198,13 +198,15 @@ async def update_user(
                 db.commit()
                 if data.username:
                     user = (
-                        db.query(models.User).filter_by(username=data.username).first()
-                    )
+                        db.query(
+                            models.User).filter_by(
+                            username=data.username).first())
 
                 else:
                     user = (
-                        db.query(models.User).filter_by(username=username).first()
-                    )
+                        db.query(
+                            models.User).filter_by(
+                            username=username).first())
                 user = jsonable_encoder(user)
                 print(user)
                 response_data = jsonable_encoder(
@@ -228,8 +230,8 @@ async def update_user(
                 )
 
                 return JSONResponse(
-                    content=response_data, status_code=status.HTTP_404_NOT_FOUND
-                )
+                    content=response_data,
+                    status_code=status.HTTP_404_NOT_FOUND)
 
         except Exception as e:
             return JSONResponse(

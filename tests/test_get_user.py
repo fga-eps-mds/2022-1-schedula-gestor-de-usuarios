@@ -113,7 +113,7 @@ def test_get_user(client):
                 "password": "senha11",
                 "active": True,
                 "updated_at": "2020-01-01T00:00:00",
-                "acess": "basic",      
+                "acess": "basic",
             }
         ],
     }

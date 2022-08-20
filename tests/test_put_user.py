@@ -20,6 +20,7 @@ def test_put_user(client):
     assert data["name"] == "string"
     assert data["acess"] == "basic"
 
+
 def test_put_userfail(client):
     user_id = "nao tem"
     response = client.put(
@@ -36,10 +37,11 @@ def test_put_userfail(client):
 
     assert response.status_code == 404
     assert response.json() == {
-                    "message": "Dado não encontrado na base",
-                    "error": None,
-                    "data": None,
-                }
+        "message": "Dado não encontrado na base",
+        "error": None,
+        "data": None,
+    }
+
 
 def test_put_user_unico(client):
     user_id = "User K"
