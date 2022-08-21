@@ -8,4 +8,5 @@ insert into user(username, job_role, name, email, password, active, acess, updat
 ('User G','Trabalho 7', 'Nome A', 'email 7', 'senha7', true, 'basic', '2020-01-01 00:00:00'),
 ('User H','Trabalho 8', 'Nome A', 'email 8', 'senha8', true, 'basic', '2020-01-01 00:00:00'),
 ('User I','Trabalho 9', 'Nome A', 'email 9', 'senha9', true, 'basic', '2020-01-01 00:00:00'),
-('User J','Trabalho 10', 'Nome A','email 10', 'senha10', true, 'basic', '2020-01-01 00:00:00');
+('User J','Trabalho 10', 'Nome A','email 10', 'senha10', true, 'basic', '2020-01-01 00:00:00'),
+('User K','Trabalho 11', 'Nome A','email 11', 'senha11', true, 'basic', '2020-01-01 00:00:00');

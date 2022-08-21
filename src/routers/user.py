@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-
+from modelos.schemas import template_put
 import models
 from database import engine, get_db
 
@@ -89,6 +89,8 @@ async def post_user(data: UserTemplate, db: Session = Depends(get_db)):
         else:
             new_object = models.User(**data.dict())
             new_object.password = str(get_password_hash(new_object.password))
+            new_object.username = new_object.username.strip()
+            new_object.name = new_object.name.strip()
             db.add(new_object)
             db.commit()
             db.refresh(new_object)
@@ -160,53 +162,83 @@ async def delete_user(username: str, db: Session = Depends(get_db)):
 
 @router.put("/user/{username}", tags=["User"])
 async def update_user(
-    data: UserTemplate,
+    data: template_put.UserTemp,
     username: str = Path(title="Username"),
     db: Session = Depends(get_db),
 ):
-    try:
-        user = (
-            db.query(models.User)
-            .filter_by(username=username)
-            .update(data.dict())
-        )
 
-        if user:
-            db.commit()
-            user = (
-                db.query(models.User).filter_by(username=data.username).first()
-            )
-            user = jsonable_encoder(user)
-            response_data = jsonable_encoder(
-                {
-                    "message": "Dado atualizado com sucesso",
-                    "error": None,
-                    "data": user,
-                }
-            )
+    if data.password:
+        data.password = str(get_password_hash(data.password))
 
-            return JSONResponse(
-                content=response_data, status_code=status.HTTP_200_OK
-            )
-        else:
-            response_data = jsonable_encoder(
-                {
-                    "message": "Dado não encontrado na base",
-                    "error": None,
-                    "data": None,
-                }
-            )
+    if data.username:
+        data.username = data.username.strip()
 
-            return JSONResponse(
-                content=response_data, status_code=status.HTTP_404_NOT_FOUND
-            )
+    if data.name:
+        data.name = data.name.strip()
 
-    except Exception as e:
+    if (db.query(models.User).filter(
+            models.User.username == data.username).one_or_none()):
         return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={
-                "message": "Erro ao processar dados",
-                "error": str(e),
+                "message": "Usuário já cadastrado",
+                "error": None,
                 "data": None,
-            },
+            }, status_code=status.HTTP_200_OK
         )
+
+    else:
+        try:
+            user = (
+                db.query(models.User)
+                .filter_by(username=username)
+                .update(data.dict(exclude_none=True))
+            )
+
+            if user:
+                db.commit()
+                if data.username:
+                    user = (
+                        db.query(
+                            models.User).filter_by(
+                            username=data.username).first())
+
+                else:
+                    user = (
+                        db.query(
+                            models.User).filter_by(
+                            username=username).first())
+                user = jsonable_encoder(user)
+                print(user)
+                response_data = jsonable_encoder(
+                    {
+                        "message": "Dado atualizado com sucesso",
+                        "error": None,
+                        "data": user,
+                    }
+                )
+
+                return JSONResponse(
+                    content=response_data, status_code=status.HTTP_200_OK
+                )
+            else:
+                response_data = jsonable_encoder(
+                    {
+                        "message": "Dado não encontrado na base",
+                        "error": None,
+                        "data": None,
+                    }
+                )
+
+                return JSONResponse(
+                    content=response_data,
+                    status_code=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={
+                    "message": "Erro ao processar dados",
+                    "error": str(e),
+                    "data": None,
+                },
+            )
