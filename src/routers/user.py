@@ -4,9 +4,10 @@ from fastapi.responses import JSONResponse
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from modelos.schemas import template_put
+
 import models
 from database import engine, get_db
+from modelos.schemas import template_put
 
 router = APIRouter()
 
@@ -66,7 +67,7 @@ async def get_user(db: Session = Depends(get_db)):
             },
         )
 
-
+#@TODO: adicionar verificação de email repetido
 @router.post("/user", tags=["User"])
 async def post_user(data: UserTemplate, db: Session = Depends(get_db)):
     try:
