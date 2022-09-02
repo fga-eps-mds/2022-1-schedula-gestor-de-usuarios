@@ -5,6 +5,7 @@ from routers.user import get_password_hash, pwd_context
 endpoint = '/auth'
 msg_nao_cadastrado = 'Usuário não cadastrado.'
 
+
 def test_get_password_hash():
     psw = get_password_hash('fulano123')
     assert pwd_context.verify('fulano123', psw)
