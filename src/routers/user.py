@@ -54,7 +54,7 @@ async def get_user(db: Session = Depends(get_db),
     try:
         if username:
             user = db.query(User).filter(User.username ==
-                                         username, User.active == True).one_or_none()
+                                         username, User.active == True).one_or_none()  # noqa 712 noqa 501
             if not user:
                 return JSONResponse(
                     status_code=status.HTTP_200_OK,

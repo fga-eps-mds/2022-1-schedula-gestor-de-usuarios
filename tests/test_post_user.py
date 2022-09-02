@@ -18,6 +18,7 @@ def test_post_user(client):
     assert data["username"] == "string"
     assert data["job_role"] == "string"
 
+
 def test_post_user_used_email(client):
     response = client.post(
         "/user",
