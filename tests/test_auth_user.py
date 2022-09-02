@@ -2,6 +2,8 @@ from fastapi.testclient import TestClient
 
 from routers.user import get_password_hash, pwd_context
 
+endpoint = '/auth'
+msg_nao_cadastrado = 'Usuário não cadastrado.'
 
 def test_get_password_hash():
     psw = get_password_hash('fulano123')
@@ -9,7 +11,7 @@ def test_get_password_hash():
 
 
 def test_auth_by_username(client: TestClient):
-    response = client.post('/auth', json={
+    response = client.post(endpoint, json={
         "credential": "user_A",
         "pwd": "senha1"
 
@@ -27,7 +29,7 @@ def test_auth_by_username(client: TestClient):
 
 
 def test_auth_by_email(client: TestClient):
-    response = client.post('/auth', json={
+    response = client.post(endpoint, json={
         "credential": "email3@email.com",
         "pwd": "senha3"
     })
@@ -36,35 +38,35 @@ def test_auth_by_email(client: TestClient):
 
 
 def test_invalid_email(client: TestClient):
-    response = client.post('/auth', json={
+    response = client.post(endpoint, json={
         "credential": "naoexiste@email.com",
         "pwd": "senha3"
     })
 
     assert response.json()["error"]
-    assert response.json()["message"] == "Usuário não cadastrado."
+    assert response.json()["message"] == msg_nao_cadastrado
     assert response.status_code == 200
 
 
 def test_invalid_user(client: TestClient):
-    response = client.post('/auth', json={
+    response = client.post(endpoint, json={
         "credential": "naoexiste",
         "pwd": "senha50"
     })
 
     assert response.json()["error"]
-    assert response.json()["message"] == "Usuário não cadastrado."
+    assert response.json()["message"] == msg_nao_cadastrado
     assert response.status_code == 200
 
 
 def test_inactive_user(client: TestClient):
-    response = client.post('/auth', json={
+    response = client.post(endpoint, json={
         "credential": "user_H",
         "pwd": "senha8"
     })
 
     assert response.json() == {
-        "message": "Usuário não cadastrado.",
+        "message": msg_nao_cadastrado,
         "error": True,
         "data": []
     }
