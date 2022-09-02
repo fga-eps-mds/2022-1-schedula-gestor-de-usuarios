@@ -1,11 +1,11 @@
-from xmlrpc.client import boolean
+import os
 
 user = {
     'username': 'teste',
     'job_role': 'trabalho 1',
     'name': 'fulano',
     'email': 'dsahu@email.com',
-    'password': 'ssjaidas',
+    f'{os.getenv("parameter")}': 'ssjaidas',
     'active': True,
     'acess': 'basic'
 }
