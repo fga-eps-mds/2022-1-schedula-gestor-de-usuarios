@@ -1,16 +1,16 @@
 import re
+
 import jwt
 from fastapi import APIRouter, Depends, status
-from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from passlib.context import CryptContext
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+
 from database import get_db
 from models import User
 
 router = APIRouter()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class CredentialsTemplate(BaseModel):
@@ -32,7 +32,6 @@ async def auth_user(data: CredentialsTemplate, db: Session = Depends(get_db)):
     credential = data.credential
     EMAIL_REGEX = r'^[a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*@[a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*$'
     login_by_email = re.search(EMAIL_REGEX, credential) is not None
-
     if login_by_email:
         user: User = db.query(User).filter(
             User.email == data.credential, User.active == True).one_or_none()  # noq 712
@@ -49,7 +48,7 @@ async def auth_user(data: CredentialsTemplate, db: Session = Depends(get_db)):
             },
         )
     else:
-        valid = pwd_context.verify(hash=user.password, secret=data.password)
+        valid = user.password == data.password
         if valid:
             encoded = jwt.encode({
                 "username": user.username,
@@ -58,9 +57,6 @@ async def auth_user(data: CredentialsTemplate, db: Session = Depends(get_db)):
                 "access": user.acess
             }, key="schedula", algorithm="HS256")
             token = jsonable_encoder({'token': encoded})
-            {"username": "usuario1", "name": "Fulano",
-                "job_role": "Policial", "access": "admin"}
-
             return JSONResponse(status_code=status.HTTP_200_OK,
                                 content={
                                     "message": "Autenticação efetuada com sucesso.",
