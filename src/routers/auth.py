@@ -15,13 +15,13 @@ router = APIRouter()
 
 class CredentialsTemplate(BaseModel):
     credential: str
-    password: str
+    pwd: str
 
     class Config:
         schema_extra = {
             "example": {
                 "credential": "Fulano",
-                "password": "Problema123"
+                "pwd": "Problema123"
             }
 
         }
@@ -49,8 +49,7 @@ async def auth_user(data: CredentialsTemplate, db: Session = Depends(get_db)):
             },
         )
     else:
-        valid = user.password == data.password
-        if valid:
+        if user.password == data.pwd:
             encoded = jwt.encode({
                 "username": user.username,
                 "name": user.name,
