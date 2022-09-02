@@ -1,6 +1,6 @@
 def test_put_user(client):
     response = client.put(
-        f"/user/user_I",
+        "/user/user_I",
         json={
             "job_role": "string",
             "name": "string",
@@ -22,7 +22,7 @@ def test_put_user(client):
 
 def test_put_userfail(client):
     response = client.put(
-        f"/user/nao_tem",
+        "/user/nao_tem",
         json={
             "job_role": "string",
             "name": "string",

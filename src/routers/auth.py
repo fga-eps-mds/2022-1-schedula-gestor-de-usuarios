@@ -60,7 +60,7 @@ async def auth_user(data: CredentialsTemplate, db: Session = Depends(get_db)):
             token = jsonable_encoder({'token': encoded})
             return JSONResponse(status_code=status.HTTP_200_OK,
                                 content={
-                                    "message": "Autenticação efetuada com sucesso.",
+                                    "message": "Autenticação efetuada com sucesso.", # noqa 501
                                     "error": None,
                                     "data": token
                                 },)
