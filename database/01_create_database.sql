@@ -16,5 +16,6 @@ CREATE TABLE "public"."user" (
     updated_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     acess  "public"."acess"    NOT NULL DEFAULT 'basic',
 
-    CONSTRAINT "PK_username" PRIMARY KEY ( "username" )   
+    CONSTRAINT "PK_username" PRIMARY KEY ( "username" ),
+    CONSTRAINT "user_email_uk" UNIQUE ("email")   
 );
