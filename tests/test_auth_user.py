@@ -14,7 +14,7 @@ def test_get_password_hash():
 def test_auth_by_username(client: TestClient):
     response = client.post(endpoint, json={
         "credential": "user_A",
-        "pwd": "senha1"
+        "value": "senha1"
 
     })
 
@@ -32,7 +32,7 @@ def test_auth_by_username(client: TestClient):
 def test_auth_by_email(client: TestClient):
     response = client.post(endpoint, json={
         "credential": "email3@email.com",
-        "pwd": "senha3"
+        "value": "senha3"
     })
     assert response.status_code == 200
     assert not response.json()["error"]
@@ -41,7 +41,7 @@ def test_auth_by_email(client: TestClient):
 def test_invalid_email(client: TestClient):
     response = client.post(endpoint, json={
         "credential": "naoexiste@email.com",
-        "pwd": "senha3"
+        "value": "senha3"
     })
 
     assert response.json()["error"]
@@ -52,7 +52,7 @@ def test_invalid_email(client: TestClient):
 def test_invalid_user(client: TestClient):
     response = client.post(endpoint, json={
         "credential": "naoexiste",
-        "pwd": "senha50"
+        "value": "senha50"
     })
 
     assert response.json()["error"]
@@ -63,7 +63,7 @@ def test_invalid_user(client: TestClient):
 def test_inactive_user(client: TestClient):
     response = client.post(endpoint, json={
         "credential": "user_H",
-        "pwd": "senha8"
+        "value": "senha8"
     })
 
     assert response.json() == {

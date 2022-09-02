@@ -1,6 +1,5 @@
 def test_zdelete_user(client):
-    user_id = "string"
-    response = client.delete(f"/user/{user_id}")
+    response = client.delete("/user/user_A")
     assert response.status_code == 200
     assert response.json() == {
         "message": "Dados deletados com sucesso",
