@@ -1,7 +1,6 @@
 def test_put_user(client):
-    user_id = "string"
     response = client.put(
-        f"/user/{user_id}",
+        f"/user/user_I",
         json={
             "job_role": "string",
             "name": "string",
@@ -44,7 +43,7 @@ def test_put_userfail(client):
 
 
 def test_put_user_unico(client):
-    user_id = "User K"
+    user_id = "user_K"
     response = client.put(
         f"/user/{user_id}",
         json={
@@ -59,3 +58,4 @@ def test_put_user_unico(client):
     assert data["data"]["email"] == "stg@email.com"
     assert data["data"]["job_role"] == "estagiario"
     assert data["data"]["name"] == "stng"
+

@@ -1,3 +1,5 @@
+from typing import Union
+
 from fastapi import APIRouter, Depends, Path, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -8,6 +10,7 @@ from sqlalchemy.orm import Session
 import models
 from database import engine, get_db
 from modelos.schemas import template_put
+from models import User
 
 router = APIRouter()
 
@@ -45,9 +48,27 @@ def get_password_hash(passe):
 
 
 @router.get("/user", tags=["User"])
-async def get_user(db: Session = Depends(get_db)):
+async def get_user(db: Session = Depends(get_db),
+                   username: Union[str, None] = None
+                   ):
     try:
-        all_data = db.query(models.User).filter_by(active=True).all()
+        if username:
+            user = db.query(User).filter(User.username ==
+                                         username, User.active == True).one_or_none()
+            if not user:
+                return JSONResponse(
+                    status_code=status.HTTP_200_OK,
+                    content={
+                        "message": "Nenhum usuário encontrado.",
+                        "error": None,
+                        "data": [],
+                    }
+                )
+            else:
+                all_data = user
+
+        else:
+            all_data = db.query(User).filter_by(active=True).all()
         all_data_json = jsonable_encoder(all_data)
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -67,18 +88,17 @@ async def get_user(db: Session = Depends(get_db)):
             },
         )
 
-#@TODO: adicionar verificação de email repetido
+
 @router.post("/user", tags=["User"])
 async def post_user(data: UserTemplate, db: Session = Depends(get_db)):
     try:
-        username = data.username
-        user = (
+        username = (
             db.query(models.User)
-            .filter(models.User.username == username)
+            .filter(models.User.username == data.username)
             .one_or_none()
         )
 
-        if user:
+        if username:
             return JSONResponse(
                 status_code=status.HTTP_409_CONFLICT,
                 content={
@@ -87,6 +107,18 @@ async def post_user(data: UserTemplate, db: Session = Depends(get_db)):
                     "data": None,
                 },
             )
+        email = db.query(models.User).filter(
+            models.User.email == data.email).one_or_none()
+        if email:
+            return JSONResponse(
+                status_code=status.HTTP_409_CONFLICT,
+                content={
+                    "message": "O email já está em uso",
+                    "error": None,
+                    "data": None,
+                },
+            )
+
         else:
             new_object = models.User(**data.dict())
             new_object.password = str(get_password_hash(new_object.password))
@@ -167,7 +199,7 @@ async def update_user(
     username: str = Path(title="Username"),
     db: Session = Depends(get_db),
 ):
-
+    print(username)
     if data.password:
         data.password = str(get_password_hash(data.password))
 
