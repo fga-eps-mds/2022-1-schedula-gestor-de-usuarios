@@ -1,7 +1,7 @@
 import time
 from urllib import response
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Header
 from starlette.middleware.cors import CORSMiddleware
 
 from routers import auth, user
@@ -18,14 +18,10 @@ app.add_middleware(
 app.include_router(user.router)
 app.include_router(auth.router)
 
-@app.middleware("http")
-async def add_process_time_header(request: Request, call_next):
-    start_time = time.time()
-    response = await call_next(request)
-    process_time = time.time() - start_time
-    response.headers["X-Process time"] = str(process_time)
-    return response
-
 @app.get("/")
 def root():
     return {"APP": "Gestor de usuários is running"}
+
+@app.get("/items/")
+async def read_items(user_agent: str | None = Header(default=None)):
+    return {"User-Agent": user_agent}
