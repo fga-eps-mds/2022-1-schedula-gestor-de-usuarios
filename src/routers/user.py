@@ -48,7 +48,7 @@ def get_password_hash(passe):
 
 
 response_unauthorized = JSONResponse({
-    "message": "Acesso negado!",
+    "message": "Acesso negado",
     "error": True,
     "data": None,
 
