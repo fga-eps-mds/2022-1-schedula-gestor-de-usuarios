@@ -1,6 +1,6 @@
 from typing import Union
 
-from fastapi import APIRouter, Depends, Path, status
+from fastapi import APIRouter, Depends, Path, status, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from passlib.context import CryptContext
@@ -8,12 +8,12 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 import models
+from util.auth_util import get_authorization
 from database import engine, get_db
 from modelos.schemas import template_put
 from models import User
 
 router = APIRouter()
-
 
 class UserTemplate(BaseModel):
     username: str
@@ -47,10 +47,23 @@ def get_password_hash(passe):
     return pwd_context.hash(passe)
 
 
+response_unauthorized = JSONResponse({
+    "message": "Acesso negado!",
+    "error": True,
+    "data": None,
+
+}, status.HTTP_401_UNAUTHORIZED)
+
+
 @router.get("/user", tags=["User"])
-async def get_user(db: Session = Depends(get_db),
-                   username: Union[str, None] = None
+async def get_user(request: Request,
+                   db: Session = Depends(get_db),
+                   username: Union[str, None] = None,
                    ):
+    auth = get_authorization(request)
+    if auth not in ['admin', 'manager', 'basic']:
+        return response_unauthorized
+
     try:
         if username:
             user = db.query(User).filter(User.username ==
@@ -90,7 +103,10 @@ async def get_user(db: Session = Depends(get_db),
 
 
 @router.post("/user", tags=["User"])
-async def post_user(data: UserTemplate, db: Session = Depends(get_db)):
+async def post_user(data: UserTemplate, request: Request, db: Session = Depends(get_db)):
+    auth = get_authorization(request)
+    if auth not in ['admin', 'manager']:
+        return response_unauthorized
     try:
         username = (
             db.query(models.User)
@@ -152,7 +168,10 @@ async def post_user(data: UserTemplate, db: Session = Depends(get_db)):
 
 
 @router.delete("/user/{username}", tags=["User"])
-async def delete_user(username: str, db: Session = Depends(get_db)):
+async def delete_user(username: str, request: Request, db: Session = Depends(get_db)):
+    auth = get_authorization(request)
+    if auth not in ['admin']:
+        return response_unauthorized
 
     try:
         user = (
@@ -196,10 +215,14 @@ async def delete_user(username: str, db: Session = Depends(get_db)):
 @router.put("/user/{username}", tags=["User"])
 async def update_user(
     data: template_put.UserTemp,
+    request: Request,
     username: str = Path(title="Username"),
     db: Session = Depends(get_db),
 ):
-    print(username)
+    auth = get_authorization(request)
+    if auth not in ['admin', 'manager']:
+        return response_unauthorized
+
     if data.password:
         data.password = str(get_password_hash(data.password))
 
