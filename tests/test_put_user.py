@@ -1,7 +1,6 @@
 def test_put_user(client):
-    user_id = "string"
     response = client.put(
-        f"/user/{user_id}",
+        "/user/user_I",
         json={
             "job_role": "string",
             "name": "string",
@@ -22,9 +21,8 @@ def test_put_user(client):
 
 
 def test_put_userfail(client):
-    user_id = "nao tem"
     response = client.put(
-        f"/user/{user_id}",
+        "/user/nao_tem",
         json={
             "job_role": "string",
             "name": "string",
@@ -44,9 +42,8 @@ def test_put_userfail(client):
 
 
 def test_put_user_unico(client):
-    user_id = "User K"
     response = client.put(
-        f"/user/{user_id}",
+        "/user/user_K",
         json={
             "job_role": "estagiario",
             "name": "stng",
