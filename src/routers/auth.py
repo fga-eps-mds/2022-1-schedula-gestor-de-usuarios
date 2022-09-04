@@ -1,9 +1,10 @@
-import re
 import os
+import re
+
 import jwt
 from fastapi import APIRouter, Depends, status
-from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -41,7 +42,7 @@ async def auth_user(data: CredentialsTemplate, db: Session = Depends(get_db)):
         data.credential, User.active == True).one_or_none()  # noqa 712
     if not user:
         return JSONResponse(
-            status_code=status.HTTP_200_OK,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             content={
                 "message": "Usuário não cadastrado.",
                 "error": True,
@@ -49,22 +50,24 @@ async def auth_user(data: CredentialsTemplate, db: Session = Depends(get_db)):
             },
         )
     else:
-        if user.password == data.value:
+        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        if pwd_context.verify(data.value, user.password):
             encoded = jwt.encode({
                 "username": user.username,
                 "name": user.name,
                 "job_role": user.job_role,
                 "access": user.acess
             }, key=os.getenv('secret'), algorithm="HS256")
-            token = jsonable_encoder({'token': encoded})
-            return JSONResponse(status_code=status.HTTP_200_OK,
-                                content={
-                                    "message": "Autenticação efetuada com sucesso.",  # noqa 501
-                                    "error": None,
-                                    "data": token
-                                },)
+            response = JSONResponse(status_code=status.HTTP_200_OK,
+                                    content={
+                                        "message": "Autenticação efetuada com sucesso.",  # noqa 501
+                                        "error": None,
+                                        "data": []
+                                    })
+            response.set_cookie(key='Authorization', value=encoded)
+            return response
         else:
-            return JSONResponse(status_code=status.HTTP_200_OK,
+            return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED,
                                 content={
                                     "message": "Senha inválida.",
                                     "error": True,
