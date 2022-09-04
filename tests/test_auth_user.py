@@ -21,10 +21,9 @@ def test_auth_by_username(client: TestClient):
     assert response.json() == {
         "message": "Autenticação efetuada com sucesso.",
         "error": None,
-        "data": {
-            "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InVzZXJfQSIsIm5hbWUiOiJOb21lIEEiLCJqb2Jfcm9sZSI6IlRyYWJhbGhvIDEiLCJhY2Nlc3MiOiJhZG1pbiJ9.cCarXgAlBG7HtaDXXv_UEwcEKuuIehM43_JwZQf_YCE"  # noqa 501
-        }
+        "data": []
     }
+    assert response.cookies['Authorization'] == "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InVzZXJfQSIsIm5hbWUiOiJOb21lIEEiLCJqb2Jfcm9sZSI6IlRyYWJhbGhvIDEiLCJhY2Nlc3MiOiJhZG1pbiJ9.cCarXgAlBG7HtaDXXv_UEwcEKuuIehM43_JwZQf_YCE"  # noqa 501
     assert response.status_code == 200
     assert not response.json()["error"]
 
@@ -36,6 +35,7 @@ def test_auth_by_email(client: TestClient):
     })
     assert response.status_code == 200
     assert not response.json()["error"]
+    assert response.cookies['Authorization'] == "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InVzZXJfQyIsIm5hbWUiOiJOb21lIEEiLCJqb2Jfcm9sZSI6IlRyYWJhbGhvIDMiLCJhY2Nlc3MiOiJtYW5hZ2VyIn0.jPfb0274i-V7QM_ajfn2TPlrHPjtoX75aGn0NdSnpsM"  # noqa 501
 
 
 def test_invalid_email(client: TestClient):
@@ -46,7 +46,7 @@ def test_invalid_email(client: TestClient):
 
     assert response.json()["error"]
     assert response.json()["message"] == msg_nao_cadastrado
-    assert response.status_code == 200
+    assert response.status_code == 401
 
 
 def test_invalid_user(client: TestClient):
@@ -57,7 +57,7 @@ def test_invalid_user(client: TestClient):
 
     assert response.json()["error"]
     assert response.json()["message"] == msg_nao_cadastrado
-    assert response.status_code == 200
+    assert response.status_code == 401
 
 
 def test_inactive_user(client: TestClient):
@@ -71,3 +71,4 @@ def test_inactive_user(client: TestClient):
         "error": True,
         "data": []
     }
+    assert response.status_code == 401

@@ -1,7 +1,7 @@
 insert into user(username, job_role, name, email, password, active, acess, updated_at) values 
-('user_A','Trabalho 1', 'Nome A', 'email1@email.com', 'senha1', true, 'admin', '2020-01-01 00:00:00'),
+('user_A','Trabalho 1', 'Nome A', 'email1@email.com', '$2b$12$lwmIAGrr/7SNAyRWEpA1Nu.N5qx4QUMUN8pKocYv8iP5TahRwRkk2', true, 'admin', '2020-01-01 00:00:00'),
 ('user_B','Trabalho 2', 'Nome A', 'email2@email.com', 'senha2', true, 'admin', '2020-01-01 00:00:00'),
-('user_C','Trabalho 3', 'Nome A', 'email3@email.com', 'senha3', true, 'manager', '2020-01-01 00:00:00'),
+('user_C','Trabalho 3', 'Nome A', 'email3@email.com', '$2b$12$RhyH5/fji2j3/he9mZ35JeY2wjFcw/CW.2IcaIh48RMwtRJSYEDvC', true, 'manager', '2020-01-01 00:00:00'),
 ('user_D','Trabalho 4', 'Nome A', 'email4@email.com', 'senha4', true, 'manager', '2020-01-01 00:00:00'),
 ('user_E','Trabalho 5', 'Nome A', 'email5@email.com', 'senha5', true, 'basic', '2020-01-01 00:00:00'),
 ('user_F','Trabalho 6', 'Nome A', 'email6@email.com', 'senha6', true, 'basic', '2020-01-01 00:00:00'),
