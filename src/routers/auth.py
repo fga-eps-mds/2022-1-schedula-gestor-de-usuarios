@@ -3,7 +3,6 @@ import re
 
 import jwt
 from fastapi import APIRouter, Depends, status
-from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from passlib.context import CryptContext
 from pydantic import BaseModel
@@ -60,11 +59,11 @@ async def auth_user(data: CredentialsTemplate, db: Session = Depends(get_db)):
                 "access": user.acess
             }, key=os.getenv('secret'), algorithm="HS256")
             response = JSONResponse(status_code=status.HTTP_200_OK,
-                                content={
-                                    "message": "Autenticação efetuada com sucesso.",  # noqa 501
-                                    "error": None,
-                                    "data": []
-                                })
+                                    content={
+                                        "message": "Autenticação efetuada com sucesso.",  # noqa 501
+                                        "error": None,
+                                        "data": []
+                                    })
             response.set_cookie(key='Authorization', value=encoded)
             return response
         else:
