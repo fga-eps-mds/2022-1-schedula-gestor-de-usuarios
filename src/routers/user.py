@@ -7,13 +7,13 @@ from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-import models
+from models import User, Base
 from util.auth_util import get_authorization
 from database import engine, get_db
 from modelos.schemas import template_put
-from models import User
 
 router = APIRouter()
+
 
 class UserTemplate(BaseModel):
     username: str
@@ -38,7 +38,7 @@ class UserTemplate(BaseModel):
         }
 
 
-models.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -103,14 +103,16 @@ async def get_user(request: Request,
 
 
 @router.post("/user", tags=["User"])
-async def post_user(data: UserTemplate, request: Request, db: Session = Depends(get_db)):
+async def post_user(data: UserTemplate,
+                    request: Request,
+                    db: Session = Depends(get_db)):
     auth = get_authorization(request)
     if auth not in ['admin', 'manager']:
         return response_unauthorized
     try:
         username = (
-            db.query(models.User)
-            .filter(models.User.username == data.username)
+            db.query(User)
+            .filter(User.username == data.username)
             .one_or_none()
         )
 
@@ -123,8 +125,8 @@ async def post_user(data: UserTemplate, request: Request, db: Session = Depends(
                     "data": None,
                 },
             )
-        email = db.query(models.User).filter(
-            models.User.email == data.email).one_or_none()
+        email = db.query(User).filter(
+            User.email == data.email).one_or_none()
         if email:
             return JSONResponse(
                 status_code=status.HTTP_409_CONFLICT,
@@ -136,7 +138,7 @@ async def post_user(data: UserTemplate, request: Request, db: Session = Depends(
             )
 
         else:
-            new_object = models.User(**data.dict())
+            new_object = User(**data.dict())
             new_object.password = str(get_password_hash(new_object.password))
             new_object.username = new_object.username.strip()
             new_object.name = new_object.name.strip()
@@ -168,15 +170,17 @@ async def post_user(data: UserTemplate, request: Request, db: Session = Depends(
 
 
 @router.delete("/user/{username}", tags=["User"])
-async def delete_user(username: str, request: Request, db: Session = Depends(get_db)):
+async def delete_user(username: str,
+                      request: Request,
+                      db: Session = Depends(get_db)):
     auth = get_authorization(request)
     if auth not in ['admin']:
         return response_unauthorized
 
     try:
         user = (
-            db.query(models.User)
-            .filter(models.User.username == username)
+            db.query(User)
+            .filter(User.username == username)
             .first()
         )
         if user:
@@ -222,7 +226,6 @@ async def update_user(
     auth = get_authorization(request)
     if auth not in ['admin', 'manager']:
         return response_unauthorized
-
     if data.password:
         data.password = str(get_password_hash(data.password))
 
@@ -232,69 +235,65 @@ async def update_user(
     if data.name:
         data.name = data.name.strip()
 
-    if (db.query(models.User).filter(
-            models.User.username == data.username).one_or_none()):
-        return JSONResponse(
-            content={
-                "message": "Usuário já cadastrado",
-                "error": None,
-                "data": None,
-            }, status_code=status.HTTP_200_OK
-        )
-
-    else:
-        try:
-            user = (
-                db.query(models.User)
-                .filter_by(username=username)
-                .update(data.dict(exclude_none=True))
-            )
-
-            if user:
-                db.commit()
-                if data.username:
-                    user = (
-                        db.query(
-                            models.User).filter_by(
-                            username=data.username).first())
-
-                else:
-                    user = (
-                        db.query(
-                            models.User).filter_by(
-                            username=username).first())
-                user = jsonable_encoder(user)
-                print(user)
-                response_data = jsonable_encoder(
-                    {
-                        "message": "Dado atualizado com sucesso",
-                        "error": None,
-                        "data": user,
-                    }
-                )
-
-                return JSONResponse(
-                    content=response_data, status_code=status.HTTP_200_OK
-                )
-            else:
-                response_data = jsonable_encoder(
-                    {
-                        "message": "Dado não encontrado na base",
-                        "error": None,
-                        "data": None,
-                    }
-                )
-
-                return JSONResponse(
-                    content=response_data,
-                    status_code=status.HTTP_404_NOT_FOUND)
-
-        except Exception as e:
+    if data.username != username:
+        if (db.query(User).filter(
+                User.username == data.username).one_or_none()):
             return JSONResponse(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={
-                    "message": "Erro ao processar dados",
-                    "error": str(e),
+                    "message": "Usuário já cadastrado",
+                    "error": None,
                     "data": None,
-                },
+                }, status_code=status.HTTP_409_CONFLICT
             )
+
+    try:
+        user = db.query(User).filter(User.username == username).update(
+            data.dict(exclude_none=True))
+        print(user)
+        if user:
+            db.commit()
+            if data.username:
+                user = (
+                    db.query(
+                        User).filter_by(
+                        username=data.username).first())
+
+            else:
+                user = (
+                    db.query(
+                        User).filter_by(
+                        username=username).first())
+            user = jsonable_encoder(user)
+            response_data = jsonable_encoder(
+                {
+                    "message": "Dado atualizado com sucesso",
+                    "error": None,
+                    "data": user,
+                }
+            )
+
+            return JSONResponse(
+                content=response_data, status_code=status.HTTP_200_OK
+            )
+        else:
+            response_data = jsonable_encoder(
+                {
+                    "message": "Dado não encontrado na base",
+                    "error": None,
+                    "data": None,
+                }
+            )
+
+            return JSONResponse(
+                content=response_data,
+                status_code=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "message": "Erro ao processar dados",
+                "error": str(e),
+                "data": None,
+            },
+        )

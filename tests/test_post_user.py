@@ -12,13 +12,15 @@ user = {
     'acess': 'basic'
 }
 
-
 ADMIN_HEADER = CaseInsensitiveDict(
-    data={"Cookie": 'Authorization=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im1hbmFnZXIiLCJuYW1lIjoiRnVsYW5vIGRlIFRhbCIsImpvYl9yb2xlIjoiRXN0YWdpYXJpbyIsImFjY2VzcyI6ImFkbWluIn0.vu3T9_4xAf2UWL8n4c-Wm3pM8JZTAmwdBubrFWgX7nM'})
+    data={"Cookie":
+          'Authorization=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im1hbmFnZXIiLCJuYW1lIjoiRnVsYW5vIGRlIFRhbCIsImpvYl9yb2xlIjoiRXN0YWdpYXJpbyIsImFjY2VzcyI6ImFkbWluIn0.vu3T9_4xAf2UWL8n4c-Wm3pM8JZTAmwdBubrFWgX7nM'})  # noqa 501
 MANAGER_HEADER = CaseInsensitiveDict(
-    data={"Cookie": 'Authorization=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im1hbmFnZXIiLCJuYW1lIjoiRnVsYW5vIGRlIFRhbCIsImpvYl9yb2xlIjoiRXN0YWdpYXJpbyIsImFjY2VzcyI6Im1hbmFnZXIifQ.zftUNuBvt8G19eq0Wqvnd52wBuxzIatQLcSpwIrWkUQ'})
+    data={"Cookie":
+    'Authorization=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im1hbmFnZXIiLCJuYW1lIjoiRnVsYW5vIGRlIFRhbCIsImpvYl9yb2xlIjoiRXN0YWdpYXJpbyIsImFjY2VzcyI6Im1hbmFnZXIifQ.zftUNuBvt8G19eq0Wqvnd52wBuxzIatQLcSpwIrWkUQ'})  # noqa 501
 BASIC_HEADER = CaseInsensitiveDict(
-    data={"Cookie": 'Authorization=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im1hbmFnZXIiLCJuYW1lIjoiRnVsYW5vIGRlIFRhbCIsImpvYl9yb2xlIjoiRXN0YWdpYXJpbyIsImFjY2VzcyI6ImJhc2ljIn0.YOEKPNoyA5xK0X4R1z3KNB-v9E2Oy1AokmzArx-2bks'})
+    data={"Cookie":
+    'Authorization=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im1hbmFnZXIiLCJuYW1lIjoiRnVsYW5vIGRlIFRhbCIsImpvYl9yb2xlIjoiRXN0YWdpYXJpbyIsImFjY2VzcyI6ImJhc2ljIn0.YOEKPNoyA5xK0X4R1z3KNB-v9E2Oy1AokmzArx-2bks'})  # noqa 501
 
 
 def test_post_user_as_admin(client: TestClient):
@@ -111,7 +113,7 @@ def test_post_user_as_basic(client: TestClient):
     assert response.json()["message"] == "Acesso negado"
 
 
-def test_post_user_used_email_as_manager(client: TestClient):
+def test_post_user_used_email_as_basic(client: TestClient):
     user['username'] = 'teste255'
     user['email'] = 'email1@email.com'
     response = client.post(
@@ -123,7 +125,7 @@ def test_post_user_used_email_as_manager(client: TestClient):
     assert response.json()["message"] == "Acesso negado"
 
 
-def test_post_user_username_as_manager(client: TestClient):
+def test_post_user_username_as_basic(client: TestClient):
     user['username'] = 'user_A'
     user['email'] = 'email50@email.com'
     response = client.post(
