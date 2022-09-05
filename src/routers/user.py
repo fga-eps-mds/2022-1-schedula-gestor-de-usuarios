@@ -1,6 +1,6 @@
 from typing import Union
 
-from fastapi import APIRouter, Depends, Path, Request, status
+from fastapi import APIRouter, Depends, Path, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from passlib.context import CryptContext
@@ -10,7 +10,6 @@ from sqlalchemy.orm import Session
 from database import engine, get_db
 from modelos.schemas import template_put
 from models import Base, User
-from util.auth_util import get_authorization
 
 router = APIRouter()
 
@@ -56,13 +55,9 @@ response_unauthorized = JSONResponse({
 
 
 @router.get("/user", tags=["User"])
-async def get_user(request: Request,
-                   db: Session = Depends(get_db),
+async def get_user(db: Session = Depends(get_db),
                    username: Union[str, None] = None,
                    ):
-    auth = get_authorization(request)
-    if auth not in ['admin', 'manager', 'basic']:
-        return response_unauthorized
 
     try:
         if username:
@@ -104,11 +99,7 @@ async def get_user(request: Request,
 
 @router.post("/user", tags=["User"])
 async def post_user(data: UserTemplate,
-                    request: Request,
                     db: Session = Depends(get_db)):
-    auth = get_authorization(request)
-    if auth not in ['admin', 'manager']:
-        return response_unauthorized
     try:
         username = (
             db.query(User)
@@ -171,11 +162,7 @@ async def post_user(data: UserTemplate,
 
 @router.delete("/user/{username}", tags=["User"])
 async def delete_user(username: str,
-                      request: Request,
                       db: Session = Depends(get_db)):
-    auth = get_authorization(request)
-    if auth not in ['admin']:
-        return response_unauthorized
 
     try:
         user = (
@@ -219,13 +206,9 @@ async def delete_user(username: str,
 @router.put("/user/{username}", tags=["User"])
 async def update_user(
     data: template_put.UserTemp,
-    request: Request,
     username: str = Path(title="Username"),
     db: Session = Depends(get_db),
 ):
-    auth = get_authorization(request)
-    if auth not in ['admin', 'manager']:
-        return response_unauthorized
     if data.password:
         data.password = str(get_password_hash(data.password))
 
