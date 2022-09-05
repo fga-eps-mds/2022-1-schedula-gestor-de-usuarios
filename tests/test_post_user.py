@@ -20,8 +20,6 @@ MANAGER_HEADER = CaseInsensitiveDict(
 BASIC_HEADER = CaseInsensitiveDict(
     data={"Cookie": 'Authorization=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im1hbmFnZXIiLCJuYW1lIjoiRnVsYW5vIGRlIFRhbCIsImpvYl9yb2xlIjoiRXN0YWdpYXJpbyIsImFjY2VzcyI6ImJhc2ljIn0.YOEKPNoyA5xK0X4R1z3KNB-v9E2Oy1AokmzArx-2bks'})
 
-# As admin
-
 
 def test_post_user_as_admin(client: TestClient):
     response = client.post(
@@ -34,6 +32,7 @@ def test_post_user_as_admin(client: TestClient):
     data = da["data"]
     assert data["username"] == "teste"
     assert data["job_role"] == "trabalho 1"
+    client.delete('/user/teste', headers=ADMIN_HEADER)
 
 
 def test_post_user_used_email_as_admin(client: TestClient):
@@ -59,8 +58,6 @@ def test_post_user_username_as_admin(client: TestClient):
     assert response.status_code == 409
     assert response.json()['message'] == "O username já está em uso"
 
-# As manager
-
 
 def test_post_user_as_manager(client: TestClient):
     user["username"] = "teste2"
@@ -75,6 +72,7 @@ def test_post_user_as_manager(client: TestClient):
     data = da["data"]
     assert data["username"] == "teste2"
     assert data["job_role"] == "trabalho 1"
+    client.delete('/user/teste2', headers=ADMIN_HEADER)
 
 
 def test_post_user_used_email_as_manager(client: TestClient):
@@ -99,8 +97,6 @@ def test_post_user_username_as_manager(client: TestClient):
     )
     assert response.status_code == 409
     assert response.json()['message'] == "O username já está em uso"
-
-# As basic
 
 
 def test_post_user_as_basic(client: TestClient):
