@@ -1,5 +1,3 @@
-import time
-
 from fastapi import FastAPI, Request
 from starlette.middleware.cors import CORSMiddleware
 
@@ -14,18 +12,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(user.router)
-app.include_router(auth.router)
-
 
 @app.middleware("http")
 async def process_request_headers(request: Request, call_next):
+    return await call_next(request)
 
-    start_time = time.time()
-    response = await call_next(request)
-    process_time = time.time() - start_time
-    response.headers["X-Process time"] = str(process_time)
-    return response
+app.include_router(user.router)
+app.include_router(auth.router)
 
 
 @app.get("/")
