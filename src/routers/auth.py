@@ -4,10 +4,10 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from util.auth_util import create_access_token, verify_password
 
 from database import get_db
 from models import User
+from util.auth_util import create_access_token, verify_password
 
 router = APIRouter()
 

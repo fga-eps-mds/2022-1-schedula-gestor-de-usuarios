@@ -1,16 +1,16 @@
 from typing import Union
 
-from fastapi import APIRouter, Depends, Path, status, Request
+from fastapi import APIRouter, Depends, Path, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from models import User, Base
-from util.auth_util import get_authorization
 from database import engine, get_db
 from modelos.schemas import template_put
+from models import Base, User
+from util.auth_util import get_authorization
 
 router = APIRouter()
 

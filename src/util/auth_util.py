@@ -1,10 +1,10 @@
 import os
-import jwt
-from passlib.context import CryptContext
-from fastapi.responses import JSONResponse
-from typing import Union, Any, List
-from fastapi import Request, status
+from typing import Any, List, Union
 
+import jwt
+from fastapi import Request, status
+from fastapi.responses import JSONResponse
+from passlib.context import CryptContext
 
 ALGORITHM = "HS256"
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
