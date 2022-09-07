@@ -18,55 +18,74 @@ class CredentialsTemplate(BaseModel):
 
     class Config:
         schema_extra = {
-            "example": {
-                "credential": "Fulano",
-                "value": "Problema123"
-            }
-
+            "example": {"credential": "Fulano", "value": "Problema123"}
         }
 
 
 @router.post("/auth", tags=["Authentication"])
 async def auth_user(data: CredentialsTemplate, db: Session = Depends(get_db)):
-    credential = data.credential
-    EMAIL_REGEX = r'^[a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*@[a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*$'  # noqa 501
-    login_by_email = re.search(EMAIL_REGEX, credential) is not None
-    if login_by_email:
-        user: User = db.query(User).filter(
-            User.email == data.credential,
-            User.active == True).one_or_none()  # noqa 712
-    else:
-        user: User = db.query(User).filter(User.username ==
-        data.credential, User.active == True).one_or_none()  # noqa 712
-    if not user:
+    try:
+        credential = data.credential
+        EMAIL_REGEX = r"^[a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*@[a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*$"  # noqa 501
+        login_by_email = re.search(EMAIL_REGEX, credential) is not None
+        if login_by_email:
+            user: User = (
+                db.query(User)
+                .filter(User.email == data.credential, User.active == True)
+                .one_or_none()
+            )
+        else:
+            user: User = (
+                db.query(User)
+                .filter(User.username == data.credential, User.active == True)
+                .one_or_none()
+            )
+        if not user:
+            return JSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content={
+                    "message": "Usuário não cadastrado.",
+                    "error": True,
+                    "data": [],
+                },
+            )
+        else:
+            if verify_password(data.value, user.password):
+                token = create_access_token(
+                    {
+                        "username": user.username,
+                        "name": user.name,
+                        "job_role": user.job_role,
+                        "access": user.acess,
+                    }
+                )
+
+                response = JSONResponse(
+                    status_code=status.HTTP_200_OK,
+                    content={
+                        "message": "Autenticação efetuada com sucesso.",  # noqa 501
+                        "error": None,
+                        "data": [],
+                    },
+                )
+                response.set_cookie(key="Authorization", value=token)
+
+                return response
+            else:
+                return JSONResponse(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    content={
+                        "message": "Senha inválida.",
+                        "error": True,
+                        "data": [],
+                    },
+                )
+    except Exception as e:
         return JSONResponse(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={
-                "message": "Usuário não cadastrado.",
+                "message": "Problema ao processar requisição",
                 "error": True,
-                "data": []
+                "data": str(e),
             },
         )
-    else:
-        if verify_password(data.value, user.password):
-            token = create_access_token({
-                                        "username": user.username,
-                                        "name": user.name,
-                                        "job_role": user.job_role,
-                                        "access": user.acess
-                                        })
-            response = JSONResponse(status_code=status.HTTP_200_OK,
-                                    content={
-                                        "message": "Autenticação efetuada com sucesso.",  # noqa 501
-                                        "error": None,
-                                        "data": []
-                                    })
-            response.set_cookie(key='Authorization', value=token)
-            return response
-        else:
-            return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED,
-                                content={
-                                    "message": "Senha inválida.",
-                                    "error": True,
-                                    "data": []
-                                },)

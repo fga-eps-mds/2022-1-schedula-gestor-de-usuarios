@@ -7,7 +7,9 @@ from fastapi.responses import JSONResponse
 from passlib.context import CryptContext
 
 ALGORITHM = "HS256"
-JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
+JWT_SECRET_KEY = os.getenv(
+    "JWT_SECRET_KEY", secure=False, httponly=True, samesite="none"
+)
 
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -21,25 +23,30 @@ def create_access_token(subject: Union[dict, Any]) -> str:
 
 
 def get_authorization(request: Request) -> str:
-    authorization = request.cookies.get('Authorization')
+    authorization = request.cookies.get("Authorization")
     if authorization:
         auth = decode_access_token(authorization)
     else:
-        auth = 'public'
+        auth = "public"
     return auth
 
 
 def decode_access_token(encoded_jwt: str) -> str:
-    return jwt.decode(encoded_jwt, key=JWT_SECRET_KEY,
-                      algorithms=[ALGORITHM])['access']
+    return jwt.decode(encoded_jwt, key=JWT_SECRET_KEY, algorithms=[ALGORITHM])[
+        "access"
+    ]
 
 
 def manage_authorization(allowed_profiles: List[str], request: Request):
     auth = get_authorization(request)
     if auth in allowed_profiles:
-        return JSONResponse({"message": "Acesso negado!",
-                             "error": True,
-                             "data": None,
-                             }, status.HTTP_401_UNAUTHORIZED)
+        return JSONResponse(
+            {
+                "message": "Acesso negado!",
+                "error": True,
+                "data": None,
+            },
+            status.HTTP_401_UNAUTHORIZED,
+        )
     else:
         return None
