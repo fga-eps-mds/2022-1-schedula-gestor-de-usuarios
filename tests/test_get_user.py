@@ -1,5 +1,4 @@
 from fastapi.testclient import TestClient
-<<<<<<< HEAD
 from requests.structures import CaseInsensitiveDict
 
 ADMIN_HEADER = CaseInsensitiveDict(
