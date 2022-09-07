@@ -14,6 +14,7 @@ BASIC_HEADER = CaseInsensitiveDict(
 
 def test_get_user_as_admin(client: TestClient):
     response = client.get("/user?username=user_A", headers=ADMIN_HEADER)
+
     assert response.status_code == 200
     assert response.json()["message"] == "dados buscados com sucesso"
     assert response.json()["data"]["name"] == "Nome A"
@@ -50,5 +51,6 @@ def test_get_user_as_basic(client: TestClient):
 
 def test_get_all_users_as_basic(client: TestClient):
     response = client.get('/user', headers=BASIC_HEADER)
+
     assert response.status_code == 200
     assert len(response.json()['data']) == 8
