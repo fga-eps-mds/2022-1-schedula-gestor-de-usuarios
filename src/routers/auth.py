@@ -1,15 +1,13 @@
-import os
 import re
 
-import jwt
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
-from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from database import get_db
 from models import User
+from util.auth_util import create_access_token, verify_password
 
 router = APIRouter()
 
@@ -50,21 +48,20 @@ async def auth_user(data: CredentialsTemplate, db: Session = Depends(get_db)):
             },
         )
     else:
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-        if pwd_context.verify(data.value, user.password):
-            encoded = jwt.encode({
-                "username": user.username,
-                "name": user.name,
-                "job_role": user.job_role,
-                "access": user.acess
-            }, key=os.getenv('secret'), algorithm="HS256")
+        if verify_password(data.value, user.password):
+            token = create_access_token({
+                                        "username": user.username,
+                                        "name": user.name,
+                                        "job_role": user.job_role,
+                                        "access": user.acess
+                                        })
             response = JSONResponse(status_code=status.HTTP_200_OK,
                                     content={
                                         "message": "Autenticação efetuada com sucesso.",  # noqa 501
                                         "error": None,
                                         "data": []
                                     })
-            response.set_cookie(key='Authorization', value=encoded)
+            response.set_cookie(key='Authorization', value=token)
             return response
         else:
             return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED,
