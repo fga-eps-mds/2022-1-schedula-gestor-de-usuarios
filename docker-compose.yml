@@ -22,7 +22,7 @@ services:
     image: postgres:latest
     container_name: schedula_user_db
     ports:
-      - "5432:5432"
+      - "5103:5432"
     volumes:
       - ./.ignore/postgres/postgres:/var/lib/postgresql/data
     environment:
