@@ -1,30 +1,41 @@
 version: "3"
 
 services:
-  gestor-de-usuarios:
-    container_name: gestor-de-usuarios
-    build:
-      dockerfile: Dockerfile
-      context: .
-    env_file: .env
+  app:
+    container_name: schedula_user
+    image: schedula/user
+    build: .
     volumes:
-      - "./src/:/home/src/"
+      - ".:/code/"
     ports:
-      - ${APP_PORT_GESTOR}:${APP_PORT_GESTOR}
+      - "3000:3000"
+    environment:
+      - ENVIRONMENT=DEVELOPMENT
+      - NODE_ENV=DEVELOPMENT
+      - DATABASE_HOST=postgres
+      - DATABASE_USER=postgres
+      - DATABASE_PASS=postgres
+      - DATABASE_DB=schedula_user
+      - DATABASE_PORT=5432
+
+  postgres:
+    image: postgres:latest
+    container_name: schedula_user_db
+    ports:
+      - "5103:5432"
+    volumes:
+      - ./.ignore/postgres/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=schedula_user
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "schedula@gmail.com"
+      PGADMIN_DEFAULT_PASSWORD: "schedula123!"
+    ports:
+      - "16543:80"
     depends_on:
-      - db
-
-  db:
-    container_name: db
-    image: postgres:13.2-alpine
-    env_file: .env
-    volumes:
-      - ./database:/docker-entrypoint-initdb.d
-
-    ports:
-      - ${DB_PORT}:${DB_PORT}
-
-networks:
-  default:
-    external:
-      name: schedula-network
+      - postgres
