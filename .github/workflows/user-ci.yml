@@ -1,0 +1,28 @@
+name: user-ci
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build app
+        run: docker-compose up -d app
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build application
+        run: docker-compose -f docker-compose.yml build
+      - name: Run application
+        run: docker-compose -f docker-compose.yml up -d
+      - name: Run tests
+        run: docker-compose -f docker-compose.yml run app test-ci

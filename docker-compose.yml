@@ -9,6 +9,7 @@ services:
       - ".:/code/"
     ports:
       - "3000:3000"
+    command: /bin/sh -c "yarn install"
     environment:
       - ENVIRONMENT=DEVELOPMENT
       - NODE_ENV=DEVELOPMENT
