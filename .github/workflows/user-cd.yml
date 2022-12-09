@@ -1,9 +1,11 @@
-name: user-cd-prod
+name: user-cd
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
 jobs:
+  ci:
+    uses: fga-eps-mds/2022-2-schedula-gestor-de-usuarios/.github/workflows/user-ci.yml@develop
   build:
     runs-on: ubuntu-latest
     steps:
@@ -12,7 +14,7 @@ jobs:
         run: docker-compose up -d app
 
   deploy:
-    needs: build
+    needs: [ ci, build ]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
